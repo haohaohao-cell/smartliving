@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>智能家居控制中心</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div id="app">
+    <section id="auth-view" class="auth-shell">
+      <div class="auth-intro">
+        <p class="eyebrow">Smart Home</p>
+        <h1>智能家居控制中心</h1>
+        <p>集中管理门禁识别、设备控制、状态监控和数据分析，为安全与舒适的智能家居提供软件界面。</p>
+        <div class="intro-grid">
+          <span>门禁验证</span>
+          <span>设备远控</span>
+          <span>数据统计</span>
+          <span>用户管理</span>
+        </div>
+      </div>
+
+      <div class="auth-panel">
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-auth-tab="login" type="button">登录</button>
+          <button class="tab" data-auth-tab="register" type="button">注册</button>
+        </div>
+
+        <form id="login-form" class="auth-form" autocomplete="off">
+          <label>用户名
+            <input name="username" autocomplete="off" required>
+          </label>
+          <label>密码
+            <input name="password" type="password" autocomplete="off" required>
+          </label>
+          <button class="primary-btn" type="submit">进入系统</button>
+        </form>
+
+        <form id="register-form" class="auth-form hidden">
+          <label>用户名
+            <input name="username" autocomplete="username" required>
+          </label>
+          <label>姓名
+            <input name="name" autocomplete="name" required>
+          </label>
+          <label>密码
+            <input name="password" type="password" autocomplete="new-password" minlength="6" required>
+          </label>
+          <label>确认密码
+            <input name="password2" type="password" autocomplete="new-password" minlength="6" required>
+          </label>
+          <button class="primary-btn" type="submit">创建账号</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="dashboard-view" class="dashboard hidden">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Smart Home</p>
+          <h1>智能家居控制中心</h1>
+        </div>
+        <div class="topbar-actions">
+          <span id="current-user" class="user-chip">未登录</span>
+          <button id="refresh-btn" class="ghost-btn" type="button">刷新</button>
+          <button id="logout-btn" class="danger-btn" type="button">退出</button>
+        </div>
+      </header>
+
+      <main class="content-grid">
+        <section class="panel hero-panel">
+          <div>
+            <p class="eyebrow">Home Status</p>
+            <h2>全屋状态总览</h2>
+            <p id="hero-summary">正在同步设备与门禁数据...</p>
+          </div>
+          <div class="stats-grid" id="overview-stats"></div>
+        </section>
+
+        <section class="panel device-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Devices</p>
+              <h2>设备控制</h2>
+            </div>
+            <div class="row-actions">
+              <button id="seed-devices-btn" class="ghost-btn hidden" type="button">初始化演示设备</button>
+              <button id="new-device-btn" class="primary-btn" type="button">新增设备</button>
+            </div>
+          </div>
+          <div class="filters">
+            <select id="type-filter">
+              <option value="">全部类型</option>
+            </select>
+            <select id="room-filter">
+              <option value="">全部房间</option>
+            </select>
+          </div>
+          <div id="device-list" class="device-list"></div>
+        </section>
+
+        <section class="panel recognition-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Recognition</p>
+              <h2>识别与门禁</h2>
+            </div>
+            <div class="mode-toggle">
+              <button class="toggle-btn active" id="mode-camera" type="button">摄像头</button>
+              <button class="toggle-btn" id="mode-upload" type="button">上传图片</button>
+            </div>
+          </div>
+          
+          <div id="camera-mode" class="detection-mode">
+            <div class="video-container">
+              <img id="video-feed" src="" alt="摄像头视频流" class="video-preview">
+              <div class="video-overlay" id="video-overlay">
+                <span>点击"抓拍并分析"按钮开始检测</span>
+              </div>
+            </div>
+            <form id="detect-form" class="stack-form">
+              <label>关联门禁设备
+                <select id="detect-device"></select>
+              </label>
+              <label>置信度
+                <input name="confidence" type="number" min="0" max="1" step="0.01" value="0.5">
+              </label>
+              <button class="primary-btn" type="submit">抓拍并分析</button>
+            </form>
+          </div>
+          
+          <div id="upload-mode" class="detection-mode hidden">
+            <div class="upload-container">
+              <input id="upload-image" type="file" accept="image/*" class="upload-input">
+              <label for="upload-image" class="upload-label">
+                <span class="upload-icon">📷</span>
+                <span>点击或拖拽上传图片</span>
+                <span class="upload-hint">支持 JPG、PNG 格式</span>
+              </label>
+              <img id="upload-preview" src="" alt="上传预览" class="upload-preview hidden">
+            </div>
+            <form id="upload-form" class="stack-form">
+              <label>关联门禁设备
+                <select id="upload-device"></select>
+              </label>
+              <label>置信度
+                <input name="confidence" type="number" min="0" max="1" step="0.01" value="0.5">
+              </label>
+              <button class="primary-btn" type="submit">分析图片</button>
+            </form>
+          </div>
+          
+          <div id="captured-image" class="image-preview hidden"></div>
+          <div id="last-detection" class="result-box">暂无识别结果</div>
+        </section>
+
+        <section class="panel analytics-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Analytics</p>
+              <h2>数据统计分析</h2>
+            </div>
+          </div>
+          <div id="analytics" class="analytics-grid"></div>
+        </section>
+
+        <section class="panel records-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Access Records</p>
+              <h2>门禁访问记录</h2>
+            </div>
+          </div>
+          <div id="record-list" class="timeline"></div>
+        </section>
+
+        <section id="admin-panel" class="panel admin-panel hidden">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Admin</p>
+              <h2>用户管理</h2>
+            </div>
+          </div>
+          <div id="user-list" class="table-list"></div>
+        </section>
+
+        <section id="face-panel" class="panel face-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Face Recognition</p>
+              <h2>人脸注册管理</h2>
+            </div>
+            <button id="new-face-btn" class="primary-btn" type="button">注册人脸</button>
+          </div>
+          <div id="face-list" class="face-list"></div>
+        </section>
+      </main>
+    </section>
+  </div>
+
+  <dialog id="device-dialog" class="device-dialog">
+    <form id="device-form" method="dialog" class="stack-form">
+      <h2 id="device-dialog-title">新增设备</h2>
+      <input name="id" type="hidden">
+      <label>设备名称
+        <input name="device_name" required>
+      </label>
+      <label>设备类型
+        <select name="device_type" required>
+          <option value="light">灯光 light</option>
+          <option value="aircon">空调/风扇 aircon</option>
+          <option value="access_control">门禁 access_control</option>
+        </select>
+      </label>
+      <label>房间
+        <input name="room" placeholder="客厅">
+      </label>
+      <label>状态
+        <select name="status">
+          <option value="off">关闭 off</option>
+          <option value="on">开启 on</option>
+        </select>
+      </label>
+      <div class="dialog-actions">
+        <button class="ghost-btn" value="cancel" type="button" id="cancel-device-btn">取消</button>
+        <button class="primary-btn" value="default" type="submit">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="face-dialog" class="face-dialog">
+    <form id="face-form" method="dialog" class="stack-form">
+      <h2 id="face-dialog-title">注册人脸</h2>
+      <input name="id" type="hidden">
+      <label>选择用户
+        <select id="face-user-select" required></select>
+      </label>
+      <label>人脸图片
+        <input name="image_data" type="file" accept="image/*" required>
+      </label>
+      <div class="face-preview" id="face-preview-container">
+        <img id="face-preview" src="" alt="人脸预览">
+      </div>
+      <div class="dialog-actions">
+        <button class="ghost-btn" value="cancel" type="button" id="cancel-face-btn">取消</button>
+        <button class="primary-btn" value="default" type="submit">注册</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="js/app.js"></script>
+</body>
+</html>
